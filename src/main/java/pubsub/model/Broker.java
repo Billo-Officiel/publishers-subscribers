@@ -1,4 +1,4 @@
-package pubsub;
+package pubsub.model;
 public class Broker {
 
     private int count = 0;
@@ -7,6 +7,10 @@ public class Broker {
 
     public Broker(int capacity) {
         this.capacity = capacity;
+    }
+
+    public int getCount() {
+        return count;
     }
 
     public synchronized void publish(final String publisherName) throws InterruptedException {

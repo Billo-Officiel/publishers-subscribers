@@ -1,22 +1,22 @@
-package pubsub;
+package pubsub.model;
 
-public class Publisher implements Runnable {
+public class Subscriber implements Runnable {
 
     private final String name;
 
     private final Broker broker;
 
-    public Publisher(final String app, final int id, final Broker broker) {
-        this.name = app + ".publisher." + id;
+    public Subscriber(final String app, final int id, final Broker broker) {
+        this.name = app + ".subscriber." + id;
         this.broker = broker;
     }
     @Override
     public void run() {
         try {
             while (!Thread.currentThread().isInterrupted()) {
-                System.out.println(name + " SUPPLY");
+                broker.subscribe(name);
 
-                broker.publish(name);
+                System.out.println(name + " CONSUME");
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
