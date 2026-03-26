@@ -49,6 +49,18 @@ public class SimulationController {
             thread.start();
         }
 
-        return "Simulation started with parameters (n=" + req.n() + ", p=" + req.p() + ", s=" + req.s() + ")";
+        new Thread(() -> {
+            try {
+                Thread.sleep(req.t());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            for (Thread thread : threads) {
+                thread.interrupt();
+            }
+            System.out.println("--- Fin de la simulation après " + req.t() + "ms ---");
+        }).start();
+
+        return "Simulation lancée avec les paramètres (n=" + req.n() + ", p=" + req.p() + ", s=" + req.s() + ", t=" + req.t() + ")";
     }
 }

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord du Courtier</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="layout">
+        <header class="topbar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="header-icon">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+            <h1>Console du Courtier Pub-Sub</h1>
+        </header>
+
+        <main class="content">
+            <section class="panel right-panel">
+                <h2>Sujets Actifs</h2>
+                <div id="broker-list" class="broker-list">
+                    <!-- Dynamic Content -->
+                </div>
+            </section>
+
+            <section class="panel main-panel">
+                <div class="card">
+                    <h3><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg> Créer un Nouveau Sujet</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">Initialiser une
+                        nouvelle file d'attente logique vide pour les messages.</p>
+                    <form id="form-create" class="form-row">
+                        <input type="text" id="create-topic" placeholder="Nom du sujet (ex. alertes)" required>
+                        <input type="number" id="create-capacity" placeholder="Capacité de la file"
+                            title="Nombre maximum de messages avant d'être plein" min="1" value="2" required>
+                        <button type="submit" class="btn-primary">Initialiser</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg> Publier un Message</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">Envoyer des
+                        données à la fin de la file d'attente d'un sujet.</p>
+                    <form id="form-publish" class="form-row">
+                        <select id="pub-topic" required>
+                            <option value="" disabled selected>Sélectionner un sujet actif...</option>
+                        </select>
+                        <input type="text" id="pub-name" placeholder="Auteur/Contenu du Message" required>
+                        <button type="submit" class="btn-primary" id="btn-pub">Publier</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg> Souscrire (Consommer)</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">Extraire les
+                        données les plus anciennes de la tête de la file d'attente d'un sujet.</p>
+                    <form id="form-subscribe" class="form-row">
+                        <select id="sub-topic" required>
+                            <option value="" disabled selected>Sélectionner un sujet actif...</option>
+                        </select>
+                        <input type="text" id="sub-name" placeholder="Identité de l'abonné" required>
+                        <button type="submit" class="btn-secondary" id="btn-sub">Consommer</button>
+                    </form>
+                </div>
+            </section>
+
+            <section class="panel right-panel">
+                <h2>Journal d'Activité</h2>
+                <div id="activity-log" class="log-container">
+                    <!-- Logs -->
+                </div>
+
+                <div class="simulation-card">
+                    <h3>Lancer la Simulation</h3>
+                    <form id="form-sim" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                        <label title="Capacité de la file pour les sujets simulés"
+                            style="display:flex; justify-content:space-between; font-size: 0.9rem; align-items: center;">
+                            Capacité de la file (N) <input type="number" id="sim-n" value="2"
+                                style="width: 60px; padding: 4px; border: 1px solid var(--border-color); border-radius: var(--radius);">
+                        </label>
+                        <label title="Nombre de threads Éditeur bombardant chaque sujet"
+                            style="display:flex; justify-content:space-between; font-size: 0.9rem; align-items: center;">
+                            Éditeurs (P) <input type="number" id="sim-p" value="2"
+                                style="width: 60px; padding: 4px; border: 1px solid var(--border-color); border-radius: var(--radius);">
+                        </label>
+                        <label title="Nombre de threads Abonné consommant chaque sujet"
+                            style="display:flex; justify-content:space-between; font-size: 0.9rem; align-items: center;">
+                            Abonnés (S) <input type="number" id="sim-s" value="3"
+                                style="width: 60px; padding: 4px; border: 1px solid var(--border-color); border-radius: var(--radius);">
+                        </label>
+                        <button type="submit" class="btn-outline" style="margin-top: 5px;">Démarrer la
+                            Simulation</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+
+</html>

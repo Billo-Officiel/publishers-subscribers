@@ -3,6 +3,7 @@ package pubsub.controller;
 import pubsub.service.BrokerService;
 import pubsub.model.Broker;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
@@ -18,7 +19,7 @@ public class BrokerController {
     }
 
     @GetMapping
-    public Map<String, Integer> listBrokers() {
+    public Map<String, BrokerService.BrokerInfo> listBrokers() {
         return brokerService.getBrokerStatuses();
     }
 
@@ -27,7 +28,7 @@ public class BrokerController {
     @PostMapping("/{topic}")
     public ResponseEntity<String> createBroker(@PathVariable String topic, @RequestBody CreateBrokerRequest request) {
         brokerService.createBroker(topic, request.capacity());
-        return ResponseEntity.ok("Broker for topic " + topic + " created with capacity " + request.capacity());
+        return ResponseEntity.ok("Courtier pour le sujet " + topic + " créé avec la capacité " + request.capacity());
     }
 
     public record PublishRequest(String publisherName) {}
@@ -38,13 +39,12 @@ public class BrokerController {
         if (broker == null) {
             return ResponseEntity.notFound().build();
         }
-        try {
-            broker.publish(request.publisherName());
-            return ResponseEntity.ok("Message published by " + request.publisherName() + " to " + topic);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return ResponseEntity.internalServerError().body("Interrupted");
+        boolean success = broker.tryPublish(request.publisherName());
+        if (!success) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body("Erreur : La file du courtier est pleine (Capacité : " + broker.getCapacity() + ")");
         }
+        return ResponseEntity.ok("Message publié par " + request.publisherName() + " sur " + topic);
     }
 
     @GetMapping("/{topic}/subscribe")
@@ -53,12 +53,11 @@ public class BrokerController {
         if (broker == null) {
             return ResponseEntity.notFound().build();
         }
-        try {
-            broker.subscribe(subscriberName);
-            return ResponseEntity.ok("Message consumed by " + subscriberName + " from " + topic);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return ResponseEntity.internalServerError().body("Interrupted");
+        boolean success = broker.trySubscribe(subscriberName);
+        if (!success) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body("Erreur : La file du courtier est vide. Aucun message à consommer.");
         }
+        return ResponseEntity.ok("Message consommé par " + subscriberName + " depuis " + topic);
     }
 }

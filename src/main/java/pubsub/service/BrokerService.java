@@ -17,9 +17,14 @@ public class BrokerService {
         return broker;
     }
     
-    public Map<String, Integer> getBrokerStatuses() {
+    public record BrokerInfo(int count, int capacity) {}
+
+    public Map<String, BrokerInfo> getBrokerStatuses() {
         return brokers.entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getCount()));
+            .collect(Collectors.toMap(
+                Map.Entry::getKey, 
+                e -> new BrokerInfo(e.getValue().getCount(), e.getValue().getCapacity())
+            ));
     }
     
     public Broker getBroker(String topic) {

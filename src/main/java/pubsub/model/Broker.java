@@ -1,8 +1,8 @@
 package pubsub.model;
+
 public class Broker {
 
     private int count = 0;
-
     private final int capacity;
 
     public Broker(int capacity) {
@@ -11,6 +11,10 @@ public class Broker {
 
     public int getCount() {
         return count;
+    }
+
+    public int getCapacity() {
+        return capacity;
     }
 
     public synchronized void publish(final String publisherName) throws InterruptedException {
@@ -24,6 +28,18 @@ public class Broker {
         System.out.println(publisherName + " CLOSE_PUB");
     }
 
+    public synchronized boolean tryPublish(final String publisherName) {
+        if (count >= capacity) {
+            return false;
+        }
+        System.out.println(publisherName + " CONNECT_PUB");
+        System.out.println(publisherName + " PUB");
+        count++;
+        notifyAll();
+        System.out.println(publisherName + " CLOSE_PUB");
+        return true;
+    }
+
     public synchronized void subscribe(final String subscriberName) throws InterruptedException {
         while (count <= 0) {
             wait();
@@ -33,5 +49,17 @@ public class Broker {
         count--;
         notifyAll();
         System.out.println(subscriberName + " CLOSE_SUB");
+    }
+
+    public synchronized boolean trySubscribe(final String subscriberName) {
+        if (count <= 0) {
+            return false;
+        }
+        System.out.println(subscriberName + " CONNECT_SUB");
+        System.out.println(subscriberName + " SUB");
+        count--;
+        notifyAll();
+        System.out.println(subscriberName + " CLOSE_SUB");
+        return true;
     }
 }
